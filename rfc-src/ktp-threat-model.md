@@ -1,7 +1,7 @@
 ---
 title: "Kinetic Trust Protocol (KTP) - Threat Model Specification"
 abbrev: "KTP-THREAT-MODEL"
-date: 2026-09-07
+date: 2026-11-02
 category: exp
 ipr: trust200902
 
@@ -665,6 +665,24 @@ Residual Risk: LOW - Zones can operate independently - Cross-zone actions fail s
 
 References: KTP-FEDERATION
 
+### TM-D-005: Induced Conservatism
+
+Description: Drive the decision rule into its own conservative outcome on purpose, so that the zone denies or supervises the actions that defend it. No component is made unavailable and every decision is correct as specified; the attack is on the timing and the pattern of those decisions. TM-D-001 to TM-D-004 take a component away. This threat leaves every component running and turns the fail-safe against the zone.
+
+Attack Vector: 1. Withhold or delay the inputs a decision point reads, so they resolve as undefined (a silent feed, an observation past its declared refresh, a rate with an empty denominator) 2. Raise measured stress through channels the zone legitimately observes, without compromising a sensor, so that R rises and E_trust falls 3. Leave a sovereignty input unanswered where the Soul veto is the decision point 4. Time any of these to coincide with the attack the defence has to answer
+
+Preconditions: - Ability to suppress, delay, or flood a channel that populates Context Signals OR - Ability to generate real activity that the Risk Factors measure as stress - Knowledge of which inputs gate which decision points
+
+Impact: HIGH - Defensive and recovery actions are denied by Silent Veto, or moved up the supervision ladder, at the moment they are needed - Supervised outcomes queue behind human approval, and the attacker sets the pace - Repeated conservative outcomes teach operators to override or route around the rule - The cost to the attacker is far below the cost of the outcome
+
+Likelihood: MEDIUM - Producing silence is cheaper than forging a signal, and KTP-CORE §6.8 (Undefined Inputs) already records that an adversary who can produce absence can produce silence - Stress can be raised with ordinary traffic, not only with a compromised sensor
+
+Mitigations: - A graded outcome before denial: an undefined input clamps the result to a more supervised level, and denial is reached only where no more restrictive outcome short of it exists (KTP-CORE §6.8 (Undefined Inputs)) - The undefined state is recorded on the decision record (KTP-CORE §6.8 (Undefined Inputs)), so restrictive outcomes caused by missing input can be told apart from those caused by measured stress - Unobservability is checked at the feed, the signal, and the term (KTP-CORE §5.2 (Risk Factor (R))) - Sensor authentication and sensor diversity (SR-004, SR-005) raise the cost of moving R through one channel - Adaptive Dormancy sheds capability progressively rather than all at once (KTP-ENFORCE) - Capability preservation priority during degradation (KTP-EMERGENCY §7.3 (Capability Preservation Priority))
+
+Residual Risk: MEDIUM - Each conservative outcome is the correct outcome for its decision; the harm is in the run of them, and no single decision exposes it - The set states how an undefined input resolves. It does not yet state how a zone distinguishes induced conservatism from real stress, or when a run of clamped decisions at one decision point becomes an event in its own right. These are limits of the set, not requirements of it
+
+References: KTP-CORE, KTP-SENSORS, KTP-ENFORCE, KTP-EMERGENCY
+
 ## Elevation of Privilege
 
 Definition: Gaining capabilities beyond those authorized
@@ -938,6 +956,8 @@ Top risks by residual risk (after mitigation):
 | abuse               |        |            |               |
 | TM-PEP-001 Bypass   | HIGH   | MEDIUM     | MEDIUM        |
 | TM-D-001 Oracle DoS | HIGH   | MEDIUM     | MEDIUM        |
+| TM-D-005 Induced    | HIGH   | MEDIUM     | MEDIUM        |
+| conservatism        |        |            |               |
 +---------------------+--------+------------+---------------+
 ~~~
 
@@ -1107,14 +1127,15 @@ Information Disclosure Threats:
 
 ~~~
 Denial of Service Threats:
-+----------+---------------------+--------+-----------+
-| ID       | Name                | Risk   | Reference |
-+----------+---------------------+--------+-----------+
-| TM-D-001 | Trust Oracle DoS    | MEDIUM | §5.5.1    |
-| TM-D-002 | Sensor Flooding     | MEDIUM | §5.5.2    |
-| TM-D-003 | Flight Recorder DoS | MEDIUM | §5.5.3    |
-| TM-D-004 | Federation DoS      | LOW    | §5.5.4    |
-+----------+---------------------+--------+-----------+
++----------+----------------------+--------+-----------+
+| ID       | Name                 | Risk   | Reference |
++----------+----------------------+--------+-----------+
+| TM-D-001 | Trust Oracle DoS     | MEDIUM | §5.5.1    |
+| TM-D-002 | Sensor Flooding      | MEDIUM | §5.5.2    |
+| TM-D-003 | Flight Recorder DoS  | MEDIUM | §5.5.3    |
+| TM-D-004 | Federation DoS       | LOW    | §5.5.4    |
+| TM-D-005 | Induced Conservatism | MEDIUM | §5.5.5    |
++----------+----------------------+--------+-----------+
 ~~~
 
 ~~~
